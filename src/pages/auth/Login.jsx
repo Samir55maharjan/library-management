@@ -1,10 +1,15 @@
 import { Button, Form } from "react-bootstrap";
 import BaseLayout from "../../components/layout/BaseLayout";
 import CustomInput from "../../components/customInput/customInput";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase-config";
+import { auth, db} from "../../firebase-config";
+import { setUserInfo } from "../../redux/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { getUserInfoAction } from "../../redux/auth/authAction";
 
 const inputs = [
   { name: "email", label: "Email", placeholder: "abc@abc.com", type: "email", required: true },
@@ -12,8 +17,11 @@ const inputs = [
 ]
 
 const Login = () => {
-  
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({});
+  const { userInfo } = useSelector(state => state.auth);
 
   const handleChange = (e) => {
     const { name, value }  = e.target;
@@ -28,18 +36,29 @@ const Login = () => {
     e.preventDefault();
 
     // validate inputs
-    // Todo: 
+    // Todo: {
+    const {email, password} = formData;
     try{
-
+    const signInPromise = signInWithEmailAndPassword(auth, email, password)
+    const userCredential = await signInPromise;
+    // toast("login successful")
+    const { user } = userCredential;
     
-    await signInWithEmailAndPassword(auth, formData.email, formData.password );
-    toast("login successful")
+    dispatch(getUserInfoAction(user.uid));
+    
     }catch(error){
       toast('invalid email or password')
     }
+    
 
-    // toast("Logged in!");
-  }
+    
+  };
+
+  useEffect(() => {
+    if (userInfo.uid){
+      navigate ("/dashboard");
+    }
+  }, [userInfo]);
 
   return (
     <>

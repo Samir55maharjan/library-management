@@ -1,7 +1,11 @@
+import BaseLayout from "../../components/layout/BaseLayout";
+
 const Dashboard = () => {
   return (
     <>
-      Dashboard component
+      <BaseLayout>
+      
+      dashboard</BaseLayout>
     </>
   )
 }
